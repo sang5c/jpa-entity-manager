@@ -46,4 +46,8 @@ public class EntityMetadata {
     public List<String> getColumnNames() {
         return columnMetadata.getColumnNames();
     }
+
+    public void fillId(Object entity, long generatedKey) {
+        columnMetadata.fillId(entity, generatedKey);
+    }
 }

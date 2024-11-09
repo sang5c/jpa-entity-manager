@@ -1,9 +1,6 @@
 package persistence.sql.dml;
 
-import persistence.sql.metadata.ColumnData;
-import persistence.sql.metadata.EntityData;
-import persistence.sql.metadata.EntityWrapper;
-import persistence.sql.metadata.EntityMetadata;
+import persistence.sql.metadata.*;
 
 import java.util.List;
 
@@ -11,8 +8,7 @@ public class DmlQueryBuilder {
 
     private static final String JOIN_DELIMITER = ", ";
 
-    public String buildInsertQuery(Object entity) {
-        EntityWrapper entityWrapper = EntityWrapper.from(entity);
+    public String buildInsertQuery(EntityWrapper entityWrapper) {
         EntityData insertColumns = entityWrapper.getInsertColumns();
         return """
                 insert into %s (%s)\s
@@ -39,9 +35,7 @@ public class DmlQueryBuilder {
                 ;""".formatted(String.join(JOIN_DELIMITER, metadata.getColumnNames()), metadata.getTableName(), metadata.getPrimaryKeyName(), id);
     }
 
-    public String buildDeleteQuery(Object entity) {
-        EntityWrapper entityWrapper = EntityWrapper.from(entity);
-
+    public String buildDeleteQuery(EntityWrapper entityWrapper) {
         return """
                 delete\s
                 from %s\s

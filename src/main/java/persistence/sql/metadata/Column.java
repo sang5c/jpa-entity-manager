@@ -94,4 +94,14 @@ public record Column(
             throw new IllegalArgumentException("필드를 찾을 수 없습니다: " + fieldName);
         }
     }
+
+    public void fillValue(Object entity, long generatedKey) {
+        try {
+            Field field = entity.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(entity, generatedKey);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalArgumentException("필드를 찾을 수 없습니다: " + fieldName);
+        }
+    }
 }

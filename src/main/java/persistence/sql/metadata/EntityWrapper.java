@@ -30,4 +30,12 @@ public class EntityWrapper {
     public EntityData getColumns() {
         return entityData;
     }
+
+    public void fillId(Object entity, long generatedKey) {
+        entityMetadata.fillId(entity, generatedKey);
+    }
+
+    public String getIdValue() {
+        return entityData.getPrimaryKey().getValue();
+    }
 }

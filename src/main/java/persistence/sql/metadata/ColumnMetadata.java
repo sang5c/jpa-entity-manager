@@ -70,4 +70,8 @@ public class ColumnMetadata {
                 .map(Column::getName)
                 .toList();
     }
+
+    public void fillId(Object entity, long generatedKey) {
+        getPrimaryKey().fillValue(entity, generatedKey);
+    }
 }
