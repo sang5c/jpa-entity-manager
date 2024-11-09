@@ -10,10 +10,12 @@ public class EntityManagerImpl<T> implements EntityManager<T> {
 
     private final JdbcTemplate jdbcTemplate;
     private final PersistenceContext persistenceContext;
+    private final EntityPersister entityPersister;
 
     public EntityManagerImpl(JdbcTemplate jdbcTemplate, PersistenceContext persistenceContext) {
         this.jdbcTemplate = jdbcTemplate;
         this.persistenceContext = persistenceContext;
+        this.entityPersister = new EntityPersister(jdbcTemplate);
     }
 
     @Override
@@ -32,11 +34,7 @@ public class EntityManagerImpl<T> implements EntityManager<T> {
 
     @Override
     public T persist(T entity) {
-        EntityWrapper entityWrapper = EntityWrapper.from(entity);
-        String query = dmlQueryBuilder.buildInsertQuery(entityWrapper);
-        long generatedKey = jdbcTemplate.insertAndReturnGeneratedKey(query);
-        entityWrapper.fillId(entity, generatedKey);
-
+        long generatedKey = entityPersister.insert(entity);
         persistenceContext.put(new EntityKey<>(entity.getClass(), generatedKey), entity);
 
         return entity;
@@ -46,13 +44,11 @@ public class EntityManagerImpl<T> implements EntityManager<T> {
     public void remove(T entity) {
         EntityWrapper entityWrapper = EntityWrapper.from(entity);
         persistenceContext.remove(new EntityKey<>(entity.getClass(), entityWrapper.getIdValue()));
-        String query = dmlQueryBuilder.buildDeleteQuery(entityWrapper);
-        jdbcTemplate.execute(query);
+        entityPersister.delete(entityWrapper);
     }
 
     @Override
     public void update(T entity) {
-        String query = dmlQueryBuilder.buildUpdateQuery(entity);
-        jdbcTemplate.execute(query);
+        entityPersister.update(entity);
     }
 }
