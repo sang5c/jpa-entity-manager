@@ -4,8 +4,8 @@
 
 ### 요구 사항
 
-- [ ] RowMapper를 동적으로 생성한다.
-- [ ] EntityLoader가 Entity를 가져오는 책임을 가진다
+- [X] RowMapper를 동적으로 생성한다.
+- [X] EntityLoader가 Entity를 가져오는 책임을 가진다
 
 ## 1단계 - EntityPersister 구현
 
