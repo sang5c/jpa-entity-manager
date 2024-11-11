@@ -10,7 +10,6 @@ public class DmlQueryBuilder {
     private static final String JOIN_DELIMITER = ", ";
 
     public String buildInsertQuery(EntityMetadata metadata, Object entity) {
-
         return """
                 insert into %s (%s)\s
                 values (%s)
@@ -22,7 +21,7 @@ public class DmlQueryBuilder {
                 );
     }
 
-    private static List<String> getColumnNames(List<Column> columns) {
+    private List<String> getColumnNames(List<Column> columns) {
         return columns.stream()
                 .map(Column::getName)
                 .toList();
