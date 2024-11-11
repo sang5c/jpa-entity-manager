@@ -1,14 +1,24 @@
 package persistence.entity;
 
+import jdbc.JdbcTemplate;
+
 public class EntityManagerImpl<T> implements EntityManager<T> {
     private final PersistenceContext persistenceContext;
     private final EntityPersister entityPersister;
     private final EntityLoader entityLoader;
 
-    public EntityManagerImpl(PersistenceContext persistenceContext, EntityPersister entityPersister, EntityLoader entityLoader) {
+    private EntityManagerImpl(PersistenceContext persistenceContext, EntityPersister entityPersister, EntityLoader entityLoader) {
         this.persistenceContext = persistenceContext;
         this.entityPersister = entityPersister;
         this.entityLoader = entityLoader;
+    }
+
+    public static <T> EntityManager<T> createDefault(Class<T> clazz, JdbcTemplate jdbcTemplate) {
+        return new EntityManagerImpl<>(
+                new PersistenceContextImpl(),
+                new EntityPersister(clazz, jdbcTemplate),
+                new EntityLoader(jdbcTemplate)
+        );
     }
 
     @Override
