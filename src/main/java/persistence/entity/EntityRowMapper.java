@@ -17,7 +17,7 @@ public class EntityRowMapper<T> implements RowMapper<T> {
     @Override
     public T mapRow(ResultSet resultSet) {
         T entity = getEntityInstance();
-        EntityMetadata metadata = EntityMetadata.from(clazz);
+        EntityMetadata<T> metadata = EntityMetadata.from(clazz);
         metadata.fillEntity(entity, resultSet);
 
         return entity;

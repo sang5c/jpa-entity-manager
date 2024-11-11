@@ -5,18 +5,18 @@ import persistence.sql.dml.DmlQueryBuilder;
 import persistence.sql.metadata.ColumnValue;
 import persistence.sql.metadata.EntityMetadata;
 
-public class EntityPersister {
+public class EntityPersister<T> {
     private static final DmlQueryBuilder dmlQueryBuilder = new DmlQueryBuilder();
 
     private final JdbcTemplate jdbcTemplate;
-    private final EntityMetadata entityMetadata;
+    private final EntityMetadata<T> entityMetadata;
 
-    public EntityPersister(Class<?> clazz, JdbcTemplate jdbcTemplate) {
+    public EntityPersister(Class<T> clazz, JdbcTemplate jdbcTemplate) {
         this.entityMetadata = EntityMetadata.from(clazz);
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public boolean update(Object entity) {
+    public boolean update(T entity) {
         try {
             String query = dmlQueryBuilder.buildUpdateQuery(entityMetadata, entity);
             jdbcTemplate.execute(query);
@@ -26,19 +26,19 @@ public class EntityPersister {
         }
     }
 
-    public void delete(Object entity) {
+    public void delete(T entity) {
         String query = dmlQueryBuilder.buildDeleteQuery(entityMetadata, entity);
         jdbcTemplate.execute(query);
     }
 
-    public long insert(Object entity) {
+    public long insert(T entity) {
         String query = dmlQueryBuilder.buildInsertQuery(entityMetadata, entity);
         long generatedKey = jdbcTemplate.insertAndReturnGeneratedKey(query);
         entityMetadata.fillId(entity, generatedKey);
         return generatedKey;
     }
 
-    public ColumnValue getIdValue(Object entity) {
+    public ColumnValue getIdValue(T entity) {
         return entityMetadata.extractIdValue(entity);
     }
 }

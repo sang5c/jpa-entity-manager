@@ -9,7 +9,7 @@ public class DmlQueryBuilder {
 
     private static final String JOIN_DELIMITER = ", ";
 
-    public String buildInsertQuery(EntityMetadata metadata, Object entity) {
+    public <T> String buildInsertQuery(EntityMetadata<T> metadata, T entity) {
         return """
                 insert into %s (%s)\s
                 values (%s)
@@ -21,21 +21,21 @@ public class DmlQueryBuilder {
                 );
     }
 
-    private List<String> getColumnNames(List<Column> columns) {
+    private <T> List<String> getColumnNames(List<Column<T>> columns) {
         return columns.stream()
                 .map(Column::getName)
                 .toList();
     }
 
-    private List<String> getColumnValues(List<Column> columns, Object entity) {
+    private <T> List<String> getColumnValues(List<Column<T>> columns, T entity) {
         return columns.stream()
                 .map(column -> column.extractColumnValue(entity))
                 .map(Object::toString)
                 .toList();
     }
 
-    public String buildSelectAllQuery(Class<?> entityClass) {
-        EntityMetadata metadata = EntityMetadata.from(entityClass);
+    public <T> String buildSelectAllQuery(Class<T> entityClass) {
+        EntityMetadata<T> metadata = EntityMetadata.from(entityClass);
 
         return """
                 select %s\s
@@ -47,7 +47,7 @@ public class DmlQueryBuilder {
                 );
     }
 
-    public String buildSelectByIdQuery(EntityMetadata metadata, Object id) {
+    public <T> String buildSelectByIdQuery(EntityMetadata<T> metadata, Object id) {
         return """
                 select %s\s
                 from %s\s
@@ -61,7 +61,7 @@ public class DmlQueryBuilder {
                 );
     }
 
-    public String buildDeleteQuery(EntityMetadata metadata, Object entity) {
+    public <T> String buildDeleteQuery(EntityMetadata<T> metadata, T entity) {
         return """
                 delete\s
                 from %s\s
@@ -74,7 +74,7 @@ public class DmlQueryBuilder {
                 );
     }
 
-    public String buildUpdateQuery(EntityMetadata metadata, Object entity) {
+    public <T> String buildUpdateQuery(EntityMetadata<T> metadata, T entity) {
         return """
                 update %s\s
                 set %s\s
@@ -87,13 +87,13 @@ public class DmlQueryBuilder {
                 );
     }
 
-    private List<String> equalityExpressions(List<Column> columns, Object entity) {
+    private <T> List<String> equalityExpressions(List<Column<T>> columns, T entity) {
         return columns.stream()
                 .map(column -> equalityExpression(column, entity))
                 .toList();
     }
 
-    private String equalityExpression(Column column, Object entity) {
+    private <T> String equalityExpression(Column<T> column, T entity) {
         return column.getName() + " = " + column.extractColumnValue(entity);
     }
 }

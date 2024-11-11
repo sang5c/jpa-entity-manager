@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public record Column(
+public record Column<T>(
         ColumnName name,
         String fieldName,
         Class<?> columnType,
@@ -17,8 +17,8 @@ public record Column(
         boolean primaryKey
 ) {
 
-    public static Column from(Field field) {
-        return new Column(
+    public static <T> Column<T> from(Field field) {
+        return new Column<>(
                 ColumnName.from(field),
                 field.getName(),
                 field.getType(),
@@ -77,7 +77,7 @@ public record Column(
         return !options.contains(ColumnOption.IDENTITY);
     }
 
-    public ColumnValue extractColumnValue(Object entity) {
+    public ColumnValue extractColumnValue(T entity) {
         try {
             Field field = entity.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
@@ -87,7 +87,7 @@ public record Column(
         }
     }
 
-    public void fillValue(Object entity, Object value) {
+    public void fillValue(T entity, Object value) {
         try {
             Field field = entity.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
