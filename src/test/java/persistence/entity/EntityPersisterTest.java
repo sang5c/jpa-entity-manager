@@ -5,7 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.DatabaseTest;
 import persistence.domain.Person;
-import persistence.sql.metadata.EntityWrapper;
 
 import java.util.List;
 
@@ -19,7 +18,7 @@ class EntityPersisterTest extends DatabaseTest {
     @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
-        entityPersister = new EntityPersister(jdbcTemplate);
+        entityPersister = new EntityPersister(Person.class, jdbcTemplate);
         createTable(Person.class);
     }
 
@@ -57,7 +56,7 @@ class EntityPersisterTest extends DatabaseTest {
         Person person = new Person(1L, "bob", 32, "test@email.com", 1);
         insert(person);
 
-        entityPersister.delete(EntityWrapper.from(person));
+        entityPersister.delete(person);
         List<Person> persons = jdbcTemplate.query("select * from my_users", new DefaultRowMapper<>(Person.class));
 
         assertThat(persons).isEmpty();

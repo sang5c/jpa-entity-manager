@@ -81,11 +81,7 @@ public record Column(
         return this.fieldName.equals(fieldName);
     }
 
-    public ColumnData withData(Object entity) {
-        return new ColumnData(this, extractColumnValue(entity));
-    }
-
-    private ColumnValue extractColumnValue(Object entity) {
+    public ColumnValue extractColumnValue(Object entity) {
         try {
             Field field = entity.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);

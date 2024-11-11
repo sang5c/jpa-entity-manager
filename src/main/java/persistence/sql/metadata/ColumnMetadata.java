@@ -59,19 +59,17 @@ public class ColumnMetadata {
                 .orElseThrow(() -> new IllegalArgumentException("컬럼을 찾을 수 없습니다"));
     }
 
-    public EntityData withData(Object entity) {
-        return columns.stream()
-                .map(column -> column.withData(entity))
-                .collect(Collectors.collectingAndThen(Collectors.toList(), EntityData::new));
-    }
-
-    public List<String> getColumnNames() {
-        return columns.stream()
-                .map(Column::getName)
-                .toList();
-    }
-
     public void fillId(Object entity, long generatedKey) {
         getPrimaryKey().fillValue(entity, generatedKey);
+    }
+
+    public ColumnValue extractIdValue(Object entity) {
+        return getPrimaryKey().extractColumnValue(entity);
+    }
+
+    public List<Column> getColumnsWithoutPrimaryKey() {
+        return columns.stream()
+                .filter(Column::hasNotIdentityStrategy)
+                .toList();
     }
 }

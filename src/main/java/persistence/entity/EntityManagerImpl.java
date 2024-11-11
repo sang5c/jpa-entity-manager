@@ -2,7 +2,7 @@ package persistence.entity;
 
 import jdbc.JdbcTemplate;
 import persistence.sql.dml.DmlQueryBuilder;
-import persistence.sql.metadata.EntityWrapper;
+import persistence.sql.metadata.EntityMetadata;
 
 public class EntityManagerImpl<T> implements EntityManager<T> {
 
@@ -12,10 +12,10 @@ public class EntityManagerImpl<T> implements EntityManager<T> {
     private final PersistenceContext persistenceContext;
     private final EntityPersister entityPersister;
 
-    public EntityManagerImpl(JdbcTemplate jdbcTemplate, PersistenceContext persistenceContext) {
+    public EntityManagerImpl(JdbcTemplate jdbcTemplate, PersistenceContext persistenceContext, EntityPersister entityPersister) {
         this.jdbcTemplate = jdbcTemplate;
         this.persistenceContext = persistenceContext;
-        this.entityPersister = new EntityPersister(jdbcTemplate);
+        this.entityPersister = entityPersister;
     }
 
     @Override
@@ -25,7 +25,7 @@ public class EntityManagerImpl<T> implements EntityManager<T> {
             return persistenceContext.get(entityKey);
         }
 
-        String query = dmlQueryBuilder.buildSelectByIdQuery(clazz, id);
+        String query = dmlQueryBuilder.buildSelectByIdQuery(EntityMetadata.from(clazz), id);
         T entity = jdbcTemplate.queryForObject(query, new DefaultRowMapper<>(clazz));
         persistenceContext.put(entityKey, entity);
 
@@ -42,9 +42,8 @@ public class EntityManagerImpl<T> implements EntityManager<T> {
 
     @Override
     public void remove(T entity) {
-        EntityWrapper entityWrapper = EntityWrapper.from(entity);
-        persistenceContext.remove(new EntityKey<>(entity.getClass(), entityWrapper.getIdValue()));
-        entityPersister.delete(entityWrapper);
+        persistenceContext.remove(new EntityKey<>(entity.getClass(), entityPersister.getIdValue(entity)));
+        entityPersister.delete(entity);
     }
 
     @Override

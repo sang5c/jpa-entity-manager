@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import persistence.DatabaseTest;
 import persistence.sql.ddl.fixture.EntityWithColumn;
 import persistence.sql.dml.DmlQueryBuilder;
+import persistence.sql.metadata.EntityMetadata;
 
 import java.util.List;
 
@@ -54,7 +55,7 @@ class H2IntegrationTest extends DatabaseTest {
         jdbcTemplate.execute("insert into entity_with_column (id, my_column, without_column, not_null_column) values (1, 'my_column', 'without_column', 'not_null_column')");
 
         DmlQueryBuilder dmlQueryBuilder = new DmlQueryBuilder();
-        EntityWithColumn entityWithColumn = jdbcTemplate.queryForObject(dmlQueryBuilder.buildSelectByIdQuery(EntityWithColumn.class, 1L), rs -> new EntityWithColumn(
+        EntityWithColumn entityWithColumn = jdbcTemplate.queryForObject(dmlQueryBuilder.buildSelectByIdQuery(EntityMetadata.from(EntityWithColumn.class), 1L), rs -> new EntityWithColumn(
                 rs.getLong("id"),
                 rs.getString("my_column"),
                 rs.getString("without_column"),
