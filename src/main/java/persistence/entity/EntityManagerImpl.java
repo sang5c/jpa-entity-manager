@@ -1,21 +1,14 @@
 package persistence.entity;
 
-import jdbc.JdbcTemplate;
-import persistence.sql.dml.DmlQueryBuilder;
-import persistence.sql.metadata.EntityMetadata;
-
 public class EntityManagerImpl<T> implements EntityManager<T> {
-
-    private static final DmlQueryBuilder dmlQueryBuilder = new DmlQueryBuilder();
-
-    private final JdbcTemplate jdbcTemplate;
     private final PersistenceContext persistenceContext;
     private final EntityPersister entityPersister;
+    private final EntityLoader entityLoader;
 
-    public EntityManagerImpl(JdbcTemplate jdbcTemplate, PersistenceContext persistenceContext, EntityPersister entityPersister) {
-        this.jdbcTemplate = jdbcTemplate;
+    public EntityManagerImpl(PersistenceContext persistenceContext, EntityPersister entityPersister, EntityLoader entityLoader) {
         this.persistenceContext = persistenceContext;
         this.entityPersister = entityPersister;
+        this.entityLoader = entityLoader;
     }
 
     @Override
@@ -25,8 +18,7 @@ public class EntityManagerImpl<T> implements EntityManager<T> {
             return persistenceContext.get(entityKey);
         }
 
-        String query = dmlQueryBuilder.buildSelectByIdQuery(EntityMetadata.from(clazz), id);
-        T entity = jdbcTemplate.queryForObject(query, new DefaultRowMapper<>(clazz));
+        T entity = entityLoader.loadEntity(clazz, id);
         persistenceContext.put(entityKey, entity);
 
         return entity;

@@ -9,11 +9,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.util.Arrays;
 
-public class DefaultRowMapper<T> implements RowMapper<T> {
+public class EntityRowMapper<T> implements RowMapper<T> {
 
     private final Class<T> clazz;
 
-    public DefaultRowMapper(Class<T> clazz) {
+    public EntityRowMapper(Class<T> clazz) {
         this.clazz = clazz;
     }
 

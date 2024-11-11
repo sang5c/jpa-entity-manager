@@ -45,7 +45,7 @@ class EntityPersisterTest extends DatabaseTest {
         person.setName("alice");
 
         entityPersister.update(person);
-        Person updatedPerson = jdbcTemplate.queryForObject("select * from my_users where id = 1", new DefaultRowMapper<>(Person.class));
+        Person updatedPerson = jdbcTemplate.queryForObject("select * from my_users where id = 1", new EntityRowMapper<>(Person.class));
 
         assertThat(updatedPerson.getName()).isEqualTo("alice");
     }
@@ -57,7 +57,7 @@ class EntityPersisterTest extends DatabaseTest {
         insert(person);
 
         entityPersister.delete(person);
-        List<Person> persons = jdbcTemplate.query("select * from my_users", new DefaultRowMapper<>(Person.class));
+        List<Person> persons = jdbcTemplate.query("select * from my_users", new EntityRowMapper<>(Person.class));
 
         assertThat(persons).isEmpty();
     }

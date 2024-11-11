@@ -9,16 +9,16 @@ import java.sql.Types;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-class DefaultRowMapperTest {
+class EntityRowMapperTest {
 
     @DisplayName("ResultSet을 받아 객체를 생성한다")
     @Test
     void mapRow() throws Exception {
-        DefaultRowMapper<Person> defaultRowMapper = new DefaultRowMapper<>(Person.class);
+        EntityRowMapper<Person> entityRowMapper = new EntityRowMapper<>(Person.class);
         SimpleResultSet resultSet = createPersonResultSet(new Person(1L, "bob", 32, "test@email.com", 1));
 
         resultSet.next();
-        Person person = defaultRowMapper.mapRow(resultSet);
+        Person person = entityRowMapper.mapRow(resultSet);
 
         assertSoftly(softly -> {
             softly.assertThat(person.getId()).isEqualTo(1L);
