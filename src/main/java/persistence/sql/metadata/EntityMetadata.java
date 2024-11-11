@@ -1,5 +1,6 @@
 package persistence.sql.metadata;
 
+import java.sql.ResultSet;
 import java.util.List;
 
 public class EntityMetadata {
@@ -44,5 +45,9 @@ public class EntityMetadata {
 
     public Column getPrimaryKey() {
         return columnMetadata.getPrimaryKey();
+    }
+
+    public void fillEntity(Object entity, ResultSet resultSet) {
+        columnMetadata.fillEntity(entity, resultSet);
     }
 }

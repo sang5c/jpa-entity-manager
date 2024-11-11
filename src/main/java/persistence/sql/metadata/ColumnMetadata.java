@@ -3,6 +3,8 @@ package persistence.sql.metadata;
 import jakarta.persistence.Transient;
 
 import java.lang.reflect.Field;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -59,5 +61,17 @@ public class ColumnMetadata {
         return columns.stream()
                 .filter(Column::hasNotIdentityStrategy)
                 .toList();
+    }
+
+    public void fillEntity(Object entity, ResultSet resultSet) {
+        columns.forEach(column -> column.fillValue(entity, getValue(resultSet, column)));
+    }
+
+    private Object getValue(ResultSet resultSet, Column column) {
+        try {
+            return resultSet.getObject(column.getName(), column.columnType());
+        } catch (SQLException e) {
+            throw new IllegalArgumentException("ResultSet 값을 가져오는데 실패했습니다");
+        }
     }
 }
