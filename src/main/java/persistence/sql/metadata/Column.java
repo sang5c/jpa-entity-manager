@@ -77,10 +77,6 @@ public record Column(
         return !options.contains(ColumnOption.IDENTITY);
     }
 
-    public boolean sameFieldName(String fieldName) {
-        return this.fieldName.equals(fieldName);
-    }
-
     public ColumnValue extractColumnValue(Object entity) {
         try {
             Field field = entity.getClass().getDeclaredField(fieldName);

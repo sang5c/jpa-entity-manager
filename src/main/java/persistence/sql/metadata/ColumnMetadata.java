@@ -47,18 +47,6 @@ public class ColumnMetadata {
                 .orElseThrow(IllegalStateException::new);
     }
 
-    public boolean hasColumn(String fieldName) {
-        return columns.stream()
-                .anyMatch(column -> column.sameFieldName(fieldName));
-    }
-
-    public Column getColumn(String fieldName) {
-        return columns.stream()
-                .filter(column -> column.sameFieldName(fieldName))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("컬럼을 찾을 수 없습니다"));
-    }
-
     public void fillId(Object entity, long generatedKey) {
         getPrimaryKey().fillValue(entity, generatedKey);
     }

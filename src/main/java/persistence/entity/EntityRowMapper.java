@@ -7,7 +7,6 @@ import persistence.sql.metadata.EntityMetadata;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
-import java.util.Arrays;
 
 public class EntityRowMapper<T> implements RowMapper<T> {
 
@@ -26,10 +25,9 @@ public class EntityRowMapper<T> implements RowMapper<T> {
     }
 
     private void fillEntityFields(T entity, ResultSet resultSet) {
-        EntityMetadata entityMetadata = EntityMetadata.from(clazz);
-        Arrays.stream(clazz.getDeclaredFields())
-                .filter(field -> entityMetadata.hasColumn(field.getName()))
-                .forEach(field -> setField(resultSet, entityMetadata.getColumn(field), entity));
+        EntityMetadata.from(clazz)
+                .getColumns()
+                .forEach(column -> setField(resultSet, column, entity));
     }
 
     private void setField(ResultSet resultSet, Column column, T targetInstance) {
