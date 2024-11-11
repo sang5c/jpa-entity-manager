@@ -91,11 +91,11 @@ public record Column(
         }
     }
 
-    public void fillValue(Object entity, long generatedKey) {
+    public void fillValue(Object entity, Object value) {
         try {
             Field field = entity.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
-            field.set(entity, generatedKey);
+            field.set(entity, value);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalArgumentException("필드를 찾을 수 없습니다: " + fieldName);
         }
