@@ -5,19 +5,16 @@ import jdbc.JdbcTemplate;
 public class EntityManagerImpl<T> implements EntityManager<T> {
     private final PersistenceContext persistenceContext;
     private final EntityPersister<T> entityPersister;
-    private final EntityLoader entityLoader;
 
-    private EntityManagerImpl(PersistenceContext persistenceContext, EntityPersister<T> entityPersister, EntityLoader entityLoader) {
+    private EntityManagerImpl(PersistenceContext persistenceContext, EntityPersister<T> entityPersister) {
         this.persistenceContext = persistenceContext;
         this.entityPersister = entityPersister;
-        this.entityLoader = entityLoader;
     }
 
     public static <T> EntityManager<T> createDefault(Class<T> clazz, JdbcTemplate jdbcTemplate) {
         return new EntityManagerImpl<>(
                 new PersistenceContextImpl(),
-                new EntityPersister<>(clazz, jdbcTemplate),
-                new EntityLoader(jdbcTemplate)
+                EntityPersister.createDefault(clazz, jdbcTemplate)
         );
     }
 
@@ -28,7 +25,7 @@ public class EntityManagerImpl<T> implements EntityManager<T> {
             return persistenceContext.get(entityKey);
         }
 
-        T entity = entityLoader.loadEntity(clazz, id);
+        T entity = entityPersister.find(id);
         persistenceContext.put(entityKey, entity);
 
         return entity;

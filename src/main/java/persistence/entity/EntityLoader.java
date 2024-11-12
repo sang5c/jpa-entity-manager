@@ -14,8 +14,8 @@ public class EntityLoader {
         this.dmlQueryBuilder = new DmlQueryBuilder();
     }
 
-    public <T> T loadEntity(Class<T> clazz, Object id) {
-        String selectQuery = dmlQueryBuilder.buildSelectByIdQuery(EntityMetadata.from(clazz), id);
-        return jdbcTemplate.queryForObject(selectQuery, new EntityRowMapper<>(clazz));
+    public <T> T loadEntity(EntityMetadata<T> metadata, Object id) {
+        String selectQuery = dmlQueryBuilder.buildSelectByIdQuery(metadata, id);
+        return jdbcTemplate.queryForObject(selectQuery, new EntityRowMapper<>(metadata.getEntityClass()));
     }
 }

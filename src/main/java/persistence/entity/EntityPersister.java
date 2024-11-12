@@ -8,12 +8,22 @@ import persistence.sql.metadata.EntityMetadata;
 public class EntityPersister<T> {
     private static final DmlQueryBuilder dmlQueryBuilder = new DmlQueryBuilder();
 
-    private final JdbcTemplate jdbcTemplate;
     private final EntityMetadata<T> entityMetadata;
+    private final EntityLoader entityLoader;
+    private final JdbcTemplate jdbcTemplate;
 
-    public EntityPersister(Class<T> clazz, JdbcTemplate jdbcTemplate) {
-        this.entityMetadata = EntityMetadata.from(clazz);
+    private EntityPersister(EntityMetadata<T> entityMetadata, EntityLoader entityLoader, JdbcTemplate jdbcTemplate) {
+        this.entityMetadata = entityMetadata;
+        this.entityLoader = entityLoader;
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public static <T> EntityPersister<T> createDefault(Class<T> clazz, JdbcTemplate jdbcTemplate) {
+        return new EntityPersister<>(
+                EntityMetadata.from(clazz),
+                new EntityLoader(jdbcTemplate),
+                jdbcTemplate
+        );
     }
 
     public boolean update(T entity) {
@@ -40,5 +50,9 @@ public class EntityPersister<T> {
 
     public ColumnValue getIdValue(T entity) {
         return entityMetadata.extractIdValue(entity);
+    }
+
+    public T find(Long id) {
+        return entityLoader.loadEntity(entityMetadata, id);
     }
 }

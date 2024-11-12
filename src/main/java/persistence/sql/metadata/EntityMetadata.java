@@ -5,18 +5,18 @@ import java.util.List;
 
 public class EntityMetadata<T> {
 
+    private final Class<T> entityClass;
     private final TableName tableName;
     private final ColumnMetadata<T> columnMetadata;
 
-    private EntityMetadata(TableName tableName, ColumnMetadata<T> columnMetadata) {
+    private EntityMetadata(Class<T> entityClass, TableName tableName, ColumnMetadata<T> columnMetadata) {
+        this.entityClass = entityClass;
         this.tableName = tableName;
         this.columnMetadata = columnMetadata;
     }
 
     public static <T> EntityMetadata<T> from(Class<T> clazz) {
-        TableName tableName = TableName.from(clazz);
-        ColumnMetadata<T> columnMetadata = ColumnMetadata.from(clazz);
-        return new EntityMetadata<>(tableName, columnMetadata);
+        return new EntityMetadata<>(clazz, TableName.from(clazz), ColumnMetadata.from(clazz));
     }
 
     public String getTableName() {
@@ -49,5 +49,9 @@ public class EntityMetadata<T> {
 
     public void fillEntity(T entity, ResultSet resultSet) {
         columnMetadata.fillEntity(entity, resultSet);
+    }
+
+    public Class<T> getEntityClass() {
+        return entityClass;
     }
 }
