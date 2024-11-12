@@ -9,9 +9,9 @@ public class EntityLoader {
     private final JdbcTemplate jdbcTemplate;
     private final DmlQueryBuilder dmlQueryBuilder;
 
-    public EntityLoader(JdbcTemplate jdbcTemplate) {
+    public EntityLoader(JdbcTemplate jdbcTemplate, DmlQueryBuilder dmlQueryBuilder) {
         this.jdbcTemplate = jdbcTemplate;
-        this.dmlQueryBuilder = new DmlQueryBuilder();
+        this.dmlQueryBuilder = dmlQueryBuilder;
     }
 
     public <T> T loadEntity(EntityMetadata<T> metadata, Object id) {

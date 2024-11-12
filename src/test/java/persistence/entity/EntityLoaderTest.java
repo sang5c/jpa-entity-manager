@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.DatabaseTest;
 import persistence.domain.Person;
+import persistence.sql.dml.DmlQueryBuilder;
 import persistence.sql.metadata.EntityMetadata;
 
 import java.util.List;
@@ -25,7 +26,7 @@ class EntityLoaderTest extends DatabaseTest {
     public void setUp() throws Exception {
         super.setUp();
         createTable(Person.class);
-        entityLoader = new EntityLoader(jdbcTemplate);
+        entityLoader = new EntityLoader(jdbcTemplate, new DmlQueryBuilder());
     }
 
     @DisplayName("데이터베이스에서 Entity를 로드한다")

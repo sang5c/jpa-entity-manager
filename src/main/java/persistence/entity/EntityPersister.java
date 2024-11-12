@@ -6,23 +6,27 @@ import persistence.sql.metadata.ColumnValue;
 import persistence.sql.metadata.EntityMetadata;
 
 public class EntityPersister<T> {
-    private static final DmlQueryBuilder dmlQueryBuilder = new DmlQueryBuilder();
 
     private final EntityMetadata<T> entityMetadata;
     private final EntityLoader entityLoader;
     private final JdbcTemplate jdbcTemplate;
+    private final DmlQueryBuilder dmlQueryBuilder;
 
-    private EntityPersister(EntityMetadata<T> entityMetadata, EntityLoader entityLoader, JdbcTemplate jdbcTemplate) {
+    private EntityPersister(EntityMetadata<T> entityMetadata, EntityLoader entityLoader, JdbcTemplate jdbcTemplate, DmlQueryBuilder dmlQueryBuilder) {
         this.entityMetadata = entityMetadata;
         this.entityLoader = entityLoader;
         this.jdbcTemplate = jdbcTemplate;
+        this.dmlQueryBuilder = dmlQueryBuilder;
     }
 
     public static <T> EntityPersister<T> createDefault(Class<T> clazz, JdbcTemplate jdbcTemplate) {
+        DmlQueryBuilder dmlQueryBuilder = new DmlQueryBuilder();
+
         return new EntityPersister<>(
                 EntityMetadata.from(clazz),
-                new EntityLoader(jdbcTemplate),
-                jdbcTemplate
+                new EntityLoader(jdbcTemplate, dmlQueryBuilder),
+                jdbcTemplate,
+                dmlQueryBuilder
         );
     }
 
