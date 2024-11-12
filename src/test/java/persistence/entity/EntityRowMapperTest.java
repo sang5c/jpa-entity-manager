@@ -4,6 +4,7 @@ import org.h2.tools.SimpleResultSet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.domain.Person;
+import persistence.sql.metadata.EntityMetadata;
 
 import java.sql.Types;
 
@@ -14,7 +15,7 @@ class EntityRowMapperTest {
     @DisplayName("ResultSet을 받아 객체를 생성한다")
     @Test
     void mapRow() throws Exception {
-        EntityRowMapper<Person> entityRowMapper = new EntityRowMapper<>(Person.class);
+        EntityRowMapper<Person> entityRowMapper = new EntityRowMapper<>(EntityMetadata.from(Person.class));
         SimpleResultSet resultSet = createPersonResultSet(new Person(1L, "bob", 32, "test@email.com", 1));
 
         resultSet.next();

@@ -1,5 +1,6 @@
 package persistence.sql.metadata;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.util.List;
 
@@ -47,11 +48,24 @@ public class EntityMetadata<T> {
         return columnMetadata.getPrimaryKey();
     }
 
-    public void fillEntity(T entity, ResultSet resultSet) {
-        columnMetadata.fillEntity(entity, resultSet);
+    public T generateEntity(ResultSet resultSet) {
+        T entity = getEntityInstance();
+        fillEntity(entity, resultSet);
+
+        return entity;
     }
 
-    public Class<T> getEntityClass() {
-        return entityClass;
+    private T getEntityInstance() {
+        try {
+            return entityClass.getDeclaredConstructor().newInstance();
+        } catch (InvocationTargetException | InstantiationException e) {
+            throw new IllegalStateException("인스턴스 생성에 실패했습니다", e);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            throw new IllegalStateException("기본 생성자가 존재하지 않습니다.", e);
+        }
+    }
+
+    private void fillEntity(T entity, ResultSet resultSet) {
+        columnMetadata.fillEntity(entity, resultSet);
     }
 }

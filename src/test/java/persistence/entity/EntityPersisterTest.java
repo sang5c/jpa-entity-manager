@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.DatabaseTest;
 import persistence.domain.Person;
+import persistence.sql.metadata.EntityMetadata;
 
 import java.util.List;
 
@@ -45,7 +46,7 @@ class EntityPersisterTest extends DatabaseTest {
         person.setName("alice");
 
         entityPersister.update(person);
-        Person updatedPerson = jdbcTemplate.queryForObject("select * from my_users where id = 1", new EntityRowMapper<>(Person.class));
+        Person updatedPerson = jdbcTemplate.queryForObject("select * from my_users where id = 1", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
 
         assertThat(updatedPerson.getName()).isEqualTo("alice");
     }
@@ -57,7 +58,7 @@ class EntityPersisterTest extends DatabaseTest {
         insert(person);
 
         entityPersister.delete(person);
-        List<Person> persons = jdbcTemplate.query("select * from my_users", new EntityRowMapper<>(Person.class));
+        List<Person> persons = jdbcTemplate.query("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
 
         assertThat(persons).isEmpty();
     }

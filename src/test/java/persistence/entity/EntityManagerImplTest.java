@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.DatabaseTest;
 import persistence.domain.Person;
+import persistence.sql.metadata.EntityMetadata;
 
 import java.util.List;
 
@@ -42,7 +43,7 @@ class EntityManagerImplTest extends DatabaseTest {
         EntityManager<Person> entityManager = EntityManagerImpl.createDefault(Person.class, jdbcTemplate);
         entityManager.persist(new Person("bob", 32, "test@email.com"));
 
-        Person savedPerson = jdbcTemplate.queryForObject("select * from my_users", new EntityRowMapper<>(Person.class));
+        Person savedPerson = jdbcTemplate.queryForObject("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
 
         assertSoftly(softly -> {
             softly.assertThat(savedPerson.getId()).isEqualTo(1L);
@@ -62,7 +63,7 @@ class EntityManagerImplTest extends DatabaseTest {
         EntityManager<Person> entityManager = EntityManagerImpl.createDefault(Person.class, jdbcTemplate);
         entityManager.remove(person);
 
-        List<Person> users = jdbcTemplate.query("select * from my_users", new EntityRowMapper<>(Person.class));
+        List<Person> users = jdbcTemplate.query("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
 
         assertThat(users).isEmpty();
     }
@@ -77,7 +78,7 @@ class EntityManagerImplTest extends DatabaseTest {
         EntityManager<Person> entityManager = EntityManagerImpl.createDefault(Person.class, jdbcTemplate);
         entityManager.update(updatedPerson);
 
-        Person person = jdbcTemplate.queryForObject("select * from my_users", new EntityRowMapper<>(Person.class));
+        Person person = jdbcTemplate.queryForObject("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
 
         assertSoftly(softly -> {
             softly.assertThat(person.getId()).isEqualTo(1L);
