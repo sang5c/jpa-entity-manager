@@ -1,21 +1,21 @@
 package persistence.entity;
 
 import jdbc.JdbcTemplate;
-import persistence.sql.dml.DmlQueryBuilder;
-import persistence.sql.metadata.EntityWrapper;
 
 public class EntityManagerImpl<T> implements EntityManager<T> {
-
-    private static final DmlQueryBuilder dmlQueryBuilder = new DmlQueryBuilder();
-
-    private final JdbcTemplate jdbcTemplate;
     private final PersistenceContext persistenceContext;
-    private final EntityPersister entityPersister;
+    private final EntityPersister<T> entityPersister;
 
-    public EntityManagerImpl(JdbcTemplate jdbcTemplate, PersistenceContext persistenceContext) {
-        this.jdbcTemplate = jdbcTemplate;
+    private EntityManagerImpl(PersistenceContext persistenceContext, EntityPersister<T> entityPersister) {
         this.persistenceContext = persistenceContext;
-        this.entityPersister = new EntityPersister(jdbcTemplate);
+        this.entityPersister = entityPersister;
+    }
+
+    public static <T> EntityManager<T> createDefault(Class<T> clazz, JdbcTemplate jdbcTemplate) {
+        return new EntityManagerImpl<>(
+                new PersistenceContextImpl(),
+                EntityPersister.createDefault(clazz, jdbcTemplate)
+        );
     }
 
     @Override
@@ -25,8 +25,7 @@ public class EntityManagerImpl<T> implements EntityManager<T> {
             return persistenceContext.get(entityKey);
         }
 
-        String query = dmlQueryBuilder.buildSelectByIdQuery(clazz, id);
-        T entity = jdbcTemplate.queryForObject(query, new DefaultRowMapper<>(clazz));
+        T entity = entityPersister.find(id);
         persistenceContext.put(entityKey, entity);
 
         return entity;
@@ -42,9 +41,8 @@ public class EntityManagerImpl<T> implements EntityManager<T> {
 
     @Override
     public void remove(T entity) {
-        EntityWrapper entityWrapper = EntityWrapper.from(entity);
-        persistenceContext.remove(new EntityKey<>(entity.getClass(), entityWrapper.getIdValue()));
-        entityPersister.delete(entityWrapper);
+        persistenceContext.remove(new EntityKey<>(entity.getClass(), entityPersister.getIdValue(entity)));
+        entityPersister.delete(entity);
     }
 
     @Override

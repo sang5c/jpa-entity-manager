@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import persistence.sql.ddl.DdlQueryBuilder;
 import persistence.sql.dml.DmlQueryBuilder;
-import persistence.sql.metadata.EntityWrapper;
+import persistence.sql.metadata.EntityMetadata;
 
 import java.util.List;
 
@@ -60,15 +60,15 @@ public abstract class DatabaseTest {
         jdbcTemplate.execute(ddlQueryBuilder.buildCreateQuery(clazz));
     }
 
-    protected void insert(Object entity) {
-        jdbcTemplate.execute(dmlQueryBuilder.buildInsertQuery(EntityWrapper.from(entity)));
+    protected <T> void insert(T entity) {
+        jdbcTemplate.execute(dmlQueryBuilder.buildInsertQuery(EntityMetadata.from((Class<T>) entity.getClass()), entity));
     }
 
-    protected void dropTable(Class<?> clazz) {
+    protected <T> void dropTable(Class<T> clazz) {
         jdbcTemplate.execute(ddlQueryBuilder.buildDropQuery(clazz));
     }
 
-    protected void delete(Object entity) {
-        jdbcTemplate.execute(dmlQueryBuilder.buildDeleteQuery(EntityWrapper.from(entity)));
+    protected <T> void delete(T entity) {
+        jdbcTemplate.execute(dmlQueryBuilder.buildDeleteQuery(EntityMetadata.from((Class<T>) entity.getClass()), entity));
     }
 }

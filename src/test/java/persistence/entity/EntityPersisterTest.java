@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import persistence.DatabaseTest;
 import persistence.domain.Person;
-import persistence.sql.metadata.EntityWrapper;
+import persistence.sql.metadata.EntityMetadata;
 
 import java.util.List;
 
@@ -13,13 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EntityPersisterTest extends DatabaseTest {
 
-    private EntityPersister entityPersister;
+    private EntityPersister<Person> entityPersister;
 
     @Override
     @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
-        entityPersister = new EntityPersister(jdbcTemplate);
+        entityPersister = EntityPersister.createDefault(Person.class, jdbcTemplate);
         createTable(Person.class);
     }
 
@@ -46,7 +46,7 @@ class EntityPersisterTest extends DatabaseTest {
         person.setName("alice");
 
         entityPersister.update(person);
-        Person updatedPerson = jdbcTemplate.queryForObject("select * from my_users where id = 1", new DefaultRowMapper<>(Person.class));
+        Person updatedPerson = jdbcTemplate.queryForObject("select * from my_users where id = 1", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
 
         assertThat(updatedPerson.getName()).isEqualTo("alice");
     }
@@ -57,8 +57,8 @@ class EntityPersisterTest extends DatabaseTest {
         Person person = new Person(1L, "bob", 32, "test@email.com", 1);
         insert(person);
 
-        entityPersister.delete(EntityWrapper.from(person));
-        List<Person> persons = jdbcTemplate.query("select * from my_users", new DefaultRowMapper<>(Person.class));
+        entityPersister.delete(person);
+        List<Person> persons = jdbcTemplate.query("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
 
         assertThat(persons).isEmpty();
     }
