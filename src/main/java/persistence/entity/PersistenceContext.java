@@ -8,4 +8,6 @@ public interface PersistenceContext {
     Object get(EntityKey entityKey);
 
     void remove(EntityKey entityKey);
+
+    EntitySnapshot getDatabaseSnapshot(EntityKey entityKey);
 }

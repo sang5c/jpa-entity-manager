@@ -72,19 +72,19 @@ class EntityManagerImplTest extends DatabaseTest {
     @Test
     void update() {
         createTable(Person.class);
-        insert(new Person("bob", 32, "test@email.com"));
-
-        Person updatedPerson = new Person(1L, "alice", 25, "test@email.com", 1);
+        Person person = new Person("person", 32, "test@email.com");
         EntityManager entityManager = EntityManagerImpl.createDefault(jdbcTemplate);
-        entityManager.merge(updatedPerson);
+        Person savedPerson = entityManager.persist(person);
+        savedPerson.setAge(99);
+        entityManager.merge(savedPerson);
 
-        Person person = jdbcTemplate.queryForObject("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
+        Person resultPerson = jdbcTemplate.queryForObject("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
 
         assertSoftly(softly -> {
-            softly.assertThat(person.getId()).isEqualTo(1L);
-            softly.assertThat(person.getName()).isEqualTo("alice");
-            softly.assertThat(person.getAge()).isEqualTo(25);
-            softly.assertThat(person.getEmail()).isEqualTo("test@email.com");
+            softly.assertThat(resultPerson.getId()).isEqualTo(1L);
+            softly.assertThat(resultPerson.getName()).isEqualTo("person");
+            softly.assertThat(resultPerson.getAge()).isEqualTo(99);
+            softly.assertThat(resultPerson.getEmail()).isEqualTo("test@email.com");
         });
     }
 }

@@ -57,6 +57,9 @@ class PersistenceContextImplTest {
         EntityKey entityKey = new EntityKey(Person.class, person.getId());
         persistenceContext.put(entityKey, person);
 
+        EntitySnapshot databaseSnapshot = persistenceContext.getDatabaseSnapshot(new EntityKey(Person.class, person.getId()));
+        assertThat(databaseSnapshot).isNotNull();
+
         assertThat(persistenceContext.contains(entityKey)).isTrue();
     }
 }

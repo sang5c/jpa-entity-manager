@@ -33,7 +33,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public <T> T persist(T entity) {
-        long generatedKey = entityPersister.insert(entity);
+        Long generatedKey = entityPersister.insert(entity);
         EntityKey entityKey = new EntityKey(entity.getClass(), generatedKey);
         persistenceContext.put(entityKey, entity);
 
@@ -42,15 +42,19 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public <T> void remove(T entity) {
-        EntityKey entityKey = new EntityKey(entity.getClass(), entityPersister.getIdValue(entity));
+        EntityKey entityKey = new EntityKey(entity.getClass(), entityPersister.getIdValue(entity).value());
         persistenceContext.remove(entityKey);
         entityPersister.delete(entity);
     }
 
     @Override
     public <T> T merge(T entity) {
-        EntityKey entityKey = new EntityKey(entity.getClass(), entityPersister.getIdValue(entity));
-        entityPersister.update(entity);
+        EntityKey entityKey = new EntityKey(entity.getClass(), entityPersister.getIdValue(entity).value());
+        EntitySnapshot entitySnapshot = persistenceContext.getDatabaseSnapshot(entityKey);
+        if (entitySnapshot.isDirty(entity)) {
+            entityPersister.update(entity);
+        }
+
         persistenceContext.put(entityKey, entity);
         return entity;
     }
