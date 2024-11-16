@@ -2,51 +2,56 @@ package persistence.entity;
 
 import jdbc.JdbcTemplate;
 
-public class EntityManagerImpl<T> implements EntityManager<T> {
+public class EntityManagerImpl implements EntityManager {
     private final PersistenceContext persistenceContext;
-    private final EntityPersister<T> entityPersister;
+    private final EntityPersister entityPersister;
 
-    private EntityManagerImpl(PersistenceContext persistenceContext, EntityPersister<T> entityPersister) {
+    private EntityManagerImpl(PersistenceContext persistenceContext, EntityPersister entityPersister) {
         this.persistenceContext = persistenceContext;
         this.entityPersister = entityPersister;
     }
 
-    public static <T> EntityManager<T> createDefault(Class<T> clazz, JdbcTemplate jdbcTemplate) {
-        return new EntityManagerImpl<>(
+    public static EntityManager createDefault(JdbcTemplate jdbcTemplate) {
+        return new EntityManagerImpl(
                 new PersistenceContextImpl(),
-                EntityPersister.createDefault(clazz, jdbcTemplate)
+                EntityPersister.createDefault(jdbcTemplate)
         );
     }
 
     @Override
-    public T find(Class<T> clazz, Long id) {
-        EntityKey<T> entityKey = new EntityKey<>(clazz, id);
+    public <T> T find(Class<T> clazz, Long id) {
+        EntityKey entityKey = new EntityKey(clazz, id);
         if (persistenceContext.contains(entityKey)) {
-            return persistenceContext.get(entityKey);
+            return clazz.cast(persistenceContext.get(entityKey));
         }
 
-        T entity = entityPersister.find(id);
+        T entity = entityPersister.find(clazz, id);
         persistenceContext.put(entityKey, entity);
 
         return entity;
     }
 
     @Override
-    public T persist(T entity) {
+    public <T> T persist(T entity) {
         long generatedKey = entityPersister.insert(entity);
-        persistenceContext.put(new EntityKey<>(entity.getClass(), generatedKey), entity);
+        EntityKey entityKey = new EntityKey(entity.getClass(), generatedKey);
+        persistenceContext.put(entityKey, entity);
 
         return entity;
     }
 
     @Override
-    public void remove(T entity) {
-        persistenceContext.remove(new EntityKey<>(entity.getClass(), entityPersister.getIdValue(entity)));
+    public <T> void remove(T entity) {
+        EntityKey entityKey = new EntityKey(entity.getClass(), entityPersister.getIdValue(entity));
+        persistenceContext.remove(entityKey);
         entityPersister.delete(entity);
     }
 
     @Override
-    public void update(T entity) {
+    public <T> T merge(T entity) {
+        EntityKey entityKey = new EntityKey(entity.getClass(), entityPersister.getIdValue(entity));
         entityPersister.update(entity);
+        persistenceContext.put(entityKey, entity);
+        return entity;
     }
 }

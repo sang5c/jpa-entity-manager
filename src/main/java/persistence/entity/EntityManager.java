@@ -1,12 +1,12 @@
 package persistence.entity;
 
-public interface EntityManager<T> {
+public interface EntityManager {
 
-    T find(Class<T> clazz, Long id);
+    <T> T find(Class<T> clazz, Long id);
 
-    T persist(T entity);
+    <T> T persist(T entity);
 
-    void remove(T entity);
+    <T> void remove(T entity);
 
-    void update(T entity);
+    <T> T merge(T entity);
 }

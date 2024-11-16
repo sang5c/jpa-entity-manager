@@ -24,7 +24,7 @@ class EntityManagerImplTest extends DatabaseTest {
         createTable(Person.class);
         insert(new Person("bob", 32, "test@email.com"));
 
-        EntityManager<Person> entityManager = EntityManagerImpl.createDefault(Person.class, jdbcTemplate);
+        EntityManager entityManager = EntityManagerImpl.createDefault(jdbcTemplate);
         Person person = entityManager.find(Person.class, 1L);
 
         assertSoftly(softly -> {
@@ -40,7 +40,7 @@ class EntityManagerImplTest extends DatabaseTest {
     void persist() {
         createTable(Person.class);
 
-        EntityManager<Person> entityManager = EntityManagerImpl.createDefault(Person.class, jdbcTemplate);
+        EntityManager entityManager = EntityManagerImpl.createDefault(jdbcTemplate);
         entityManager.persist(new Person("bob", 32, "test@email.com"));
 
         Person savedPerson = jdbcTemplate.queryForObject("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
@@ -60,7 +60,7 @@ class EntityManagerImplTest extends DatabaseTest {
         insert(new Person("bob", 32, "test@email.com"));
 
         Person person = new Person(1L, "bob", 32, "test@email.com", 1);
-        EntityManager<Person> entityManager = EntityManagerImpl.createDefault(Person.class, jdbcTemplate);
+        EntityManager entityManager = EntityManagerImpl.createDefault(jdbcTemplate);
         entityManager.remove(person);
 
         List<Person> users = jdbcTemplate.query("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
@@ -75,8 +75,8 @@ class EntityManagerImplTest extends DatabaseTest {
         insert(new Person("bob", 32, "test@email.com"));
 
         Person updatedPerson = new Person(1L, "alice", 25, "test@email.com", 1);
-        EntityManager<Person> entityManager = EntityManagerImpl.createDefault(Person.class, jdbcTemplate);
-        entityManager.update(updatedPerson);
+        EntityManager entityManager = EntityManagerImpl.createDefault(jdbcTemplate);
+        entityManager.merge(updatedPerson);
 
         Person person = jdbcTemplate.queryForObject("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
 

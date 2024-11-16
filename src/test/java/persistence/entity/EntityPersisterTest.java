@@ -13,13 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EntityPersisterTest extends DatabaseTest {
 
-    private EntityPersister<Person> entityPersister;
+    private EntityPersister entityPersister;
 
     @Override
     @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
-        entityPersister = EntityPersister.createDefault(Person.class, jdbcTemplate);
+        entityPersister = EntityPersister.createDefault(jdbcTemplate);
         createTable(Person.class);
     }
 

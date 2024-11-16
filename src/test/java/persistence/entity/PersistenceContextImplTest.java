@@ -20,10 +20,10 @@ class PersistenceContextImplTest {
     @Test
     void put() {
         Person person = new Person(1L, "bob", 32, "test@email.com", 1);
-        EntityKey<Person> entityKey = new EntityKey<>(Person.class, person.getId());
+        EntityKey entityKey = new EntityKey(Person.class, person.getId());
 
         persistenceContext.put(entityKey, person);
-        Person actualPerson = persistenceContext.get(entityKey);
+        Person actualPerson = (Person) persistenceContext.get(entityKey);
 
         assertThat(actualPerson.getId()).isEqualTo(person.getId());
     }
@@ -32,7 +32,7 @@ class PersistenceContextImplTest {
     @Test
     void remove() {
         Person person = new Person(1L, "bob", 32, "test@email.com", 1);
-        EntityKey<Person> entityKey = new EntityKey<>(Person.class, person.getId());
+        EntityKey entityKey = new EntityKey(Person.class, person.getId());
         persistenceContext.put(entityKey, person);
 
         persistenceContext.remove(entityKey);
@@ -43,9 +43,9 @@ class PersistenceContextImplTest {
     @DisplayName("저장되지 않은 Entity를 조회하면 null을 반환한다")
     @Test
     void get() {
-        EntityKey<Person> entityKey = new EntityKey<>(Person.class, 1L);
+        EntityKey entityKey = new EntityKey(Person.class, 1L);
 
-        Person actualPerson = persistenceContext.get(entityKey);
+        Person actualPerson = (Person) persistenceContext.get(entityKey);
 
         assertThat(actualPerson).isNull();
     }
@@ -54,7 +54,7 @@ class PersistenceContextImplTest {
     @Test
     void contains() {
         Person person = new Person(1L, "bob", 32, "test@email.com", 1);
-        EntityKey<Person> entityKey = new EntityKey<>(Person.class, person.getId());
+        EntityKey entityKey = new EntityKey(Person.class, person.getId());
         persistenceContext.put(entityKey, person);
 
         assertThat(persistenceContext.contains(entityKey)).isTrue();

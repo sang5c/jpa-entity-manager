@@ -5,34 +5,32 @@ import persistence.sql.dml.DmlQueryBuilder;
 import persistence.sql.metadata.ColumnValue;
 import persistence.sql.metadata.EntityMetadata;
 
-public class EntityPersister<T> {
+public class EntityPersister {
 
-    private final EntityMetadata<T> entityMetadata;
     private final EntityLoader entityLoader;
     private final JdbcTemplate jdbcTemplate;
     private final DmlQueryBuilder dmlQueryBuilder;
 
-    private EntityPersister(EntityMetadata<T> entityMetadata, EntityLoader entityLoader, JdbcTemplate jdbcTemplate, DmlQueryBuilder dmlQueryBuilder) {
-        this.entityMetadata = entityMetadata;
+    private EntityPersister(EntityLoader entityLoader, JdbcTemplate jdbcTemplate, DmlQueryBuilder dmlQueryBuilder) {
         this.entityLoader = entityLoader;
         this.jdbcTemplate = jdbcTemplate;
         this.dmlQueryBuilder = dmlQueryBuilder;
     }
 
-    public static <T> EntityPersister<T> createDefault(Class<T> clazz, JdbcTemplate jdbcTemplate) {
+    public static EntityPersister createDefault(JdbcTemplate jdbcTemplate) {
         DmlQueryBuilder dmlQueryBuilder = new DmlQueryBuilder();
 
-        return new EntityPersister<>(
-                EntityMetadata.from(clazz),
+        return new EntityPersister(
                 new EntityLoader(jdbcTemplate, dmlQueryBuilder),
                 jdbcTemplate,
                 dmlQueryBuilder
         );
     }
 
-    public boolean update(T entity) {
+    public boolean update(Object entity) {
+        EntityMetadata metadata = EntityMetadata.from(entity.getClass());
+        String query = dmlQueryBuilder.buildUpdateQuery(metadata, entity);
         try {
-            String query = dmlQueryBuilder.buildUpdateQuery(entityMetadata, entity);
             jdbcTemplate.execute(query);
             return true;
         } catch (Exception e) {
@@ -40,23 +38,27 @@ public class EntityPersister<T> {
         }
     }
 
-    public void delete(T entity) {
-        String query = dmlQueryBuilder.buildDeleteQuery(entityMetadata, entity);
+    public void delete(Object entity) {
+        EntityMetadata metadata = EntityMetadata.from(entity.getClass());
+        String query = dmlQueryBuilder.buildDeleteQuery(metadata, entity);
         jdbcTemplate.execute(query);
     }
 
-    public long insert(T entity) {
-        String query = dmlQueryBuilder.buildInsertQuery(entityMetadata, entity);
+    public long insert(Object entity) {
+        EntityMetadata metadata = EntityMetadata.from(entity.getClass());
+        String query = dmlQueryBuilder.buildInsertQuery(metadata, entity);
         long generatedKey = jdbcTemplate.insertAndReturnGeneratedKey(query);
-        entityMetadata.fillId(entity, generatedKey);
+        metadata.fillId(entity, generatedKey);
         return generatedKey;
     }
 
-    public ColumnValue getIdValue(T entity) {
-        return entityMetadata.extractIdValue(entity);
+    public ColumnValue getIdValue(Object entity) {
+        EntityMetadata metadata = EntityMetadata.from(entity.getClass());
+        return metadata.extractIdValue(entity);
     }
 
-    public T find(Long id) {
-        return entityLoader.loadEntity(entityMetadata, id);
+    public <T> T find(Class<T> clazz, Long id) {
+        EntityMetadata metadata = EntityMetadata.from(clazz);
+        return entityLoader.loadEntity(metadata, id);
     }
 }

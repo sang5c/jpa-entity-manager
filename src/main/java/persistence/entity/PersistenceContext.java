@@ -1,11 +1,11 @@
 package persistence.entity;
 
 public interface PersistenceContext {
-    void put(EntityKey<?> entityKey, Object entity);
+    void put(EntityKey entityKey, Object entity);
 
-    boolean contains(EntityKey<?> entityKey);
+    boolean contains(EntityKey entityKey);
 
-    <T> T get(EntityKey<T> entityKey);
+    Object get(EntityKey entityKey);
 
-    void remove(EntityKey<?> entityKey);
+    void remove(EntityKey entityKey);
 }

@@ -1,5 +1,11 @@
 # jpa-entity-manager
 
+## 3단계 - Persistence Context, Dirty Check
+
+### 요구 사항
+
+- [ ] 더티체킹을 구현한다
+
 ## 2단계 - EntityLoader 구현
 
 ### 요구 사항

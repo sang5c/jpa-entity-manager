@@ -7,9 +7,9 @@ import java.sql.ResultSet;
 
 public class EntityRowMapper<T> implements RowMapper<T> {
 
-    private final EntityMetadata<T> entityMetadata;
+    private final EntityMetadata entityMetadata;
 
-    public EntityRowMapper(EntityMetadata<T> entityMetadata) {
+    public EntityRowMapper(EntityMetadata entityMetadata) {
         this.entityMetadata = entityMetadata;
     }
 
