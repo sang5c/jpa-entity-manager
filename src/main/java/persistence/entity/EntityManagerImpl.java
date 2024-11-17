@@ -33,8 +33,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public <T> T persist(T entity) {
-        Long generatedKey = entityPersister.insert(entity);
-        EntityKey entityKey = new EntityKey(entity.getClass(), generatedKey);
+        EntityKey entityKey = entityPersister.insert(entity);
         persistenceContext.put(entityKey, entity);
 
         return entity;

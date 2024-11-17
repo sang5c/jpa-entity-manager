@@ -33,9 +33,9 @@ class EntityPersisterTest extends DatabaseTest {
     void insert() {
         Person person = new Person("bob", 32, "test@email.com");
 
-        long key = entityPersister.insert(person);
+        EntityKey key = entityPersister.insert(person);
 
-        assertThat(key).isEqualTo(1L);
+        assertThat(key.id()).isEqualTo(1L);
     }
 
     @DisplayName("update를 수행하면 데이터베이스에 반영된다")

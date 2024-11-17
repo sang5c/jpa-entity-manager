@@ -39,12 +39,13 @@ public class EntityPersister {
         jdbcTemplate.execute(query);
     }
 
-    public long insert(Object entity) {
+    public EntityKey insert(Object entity) {
         EntityMetadata metadata = EntityMetadata.from(entity.getClass());
         String query = dmlQueryBuilder.buildInsertQuery(metadata, entity);
         long generatedKey = jdbcTemplate.insertAndReturnGeneratedKey(query);
         metadata.fillId(entity, generatedKey);
-        return generatedKey;
+
+        return new EntityKey(entity.getClass(), generatedKey);
     }
 
     public ColumnValue getIdValue(Object entity) {
