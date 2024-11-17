@@ -30,12 +30,7 @@ public class EntityPersister {
     public boolean update(Object entity) {
         EntityMetadata metadata = EntityMetadata.from(entity.getClass());
         String query = dmlQueryBuilder.buildUpdateQuery(metadata, entity);
-        try {
-            jdbcTemplate.execute(query);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+        return jdbcTemplate.executeUpdate(query);
     }
 
     public void delete(Object entity) {
