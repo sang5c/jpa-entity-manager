@@ -5,68 +5,54 @@ import persistence.sql.dml.DmlQueryBuilder;
 import persistence.sql.metadata.ColumnValue;
 import persistence.sql.metadata.EntityMetadata;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class EntityPersister {
 
     private final EntityLoader entityLoader;
     private final JdbcTemplate jdbcTemplate;
     private final DmlQueryBuilder dmlQueryBuilder;
-    private final Map<Class<?>, EntityMetadata> metadataCache = new HashMap<>();
+    private final EntityMetadata entityMetadata;
 
-    private EntityPersister(EntityLoader entityLoader, JdbcTemplate jdbcTemplate, DmlQueryBuilder dmlQueryBuilder) {
+    private EntityPersister(EntityLoader entityLoader, JdbcTemplate jdbcTemplate, DmlQueryBuilder dmlQueryBuilder, EntityMetadata entityMetadata) {
         this.entityLoader = entityLoader;
         this.jdbcTemplate = jdbcTemplate;
         this.dmlQueryBuilder = dmlQueryBuilder;
+        this.entityMetadata = entityMetadata;
     }
 
-    public static EntityPersister createDefault(JdbcTemplate jdbcTemplate) {
+    public static EntityPersister createDefault(JdbcTemplate jdbcTemplate, Class<?> clazz) {
         DmlQueryBuilder dmlQueryBuilder = new DmlQueryBuilder();
 
         return new EntityPersister(
                 new EntityLoader(jdbcTemplate, dmlQueryBuilder),
                 jdbcTemplate,
-                dmlQueryBuilder
+                dmlQueryBuilder,
+                EntityMetadata.from(clazz)
         );
     }
 
     public boolean update(Object entity) {
-        EntityMetadata metadata = getMetadata(entity);
-        String query = dmlQueryBuilder.buildUpdateQuery(metadata, entity);
+        String query = dmlQueryBuilder.buildUpdateQuery(entityMetadata, entity);
         return jdbcTemplate.executeUpdate(query);
     }
 
     public void delete(Object entity) {
-        EntityMetadata metadata = getMetadata(entity);
-        String query = dmlQueryBuilder.buildDeleteQuery(metadata, entity);
+        String query = dmlQueryBuilder.buildDeleteQuery(entityMetadata, entity);
         jdbcTemplate.execute(query);
     }
 
     public EntityKey insert(Object entity) {
-        EntityMetadata metadata = getMetadata(entity);
-        String query = dmlQueryBuilder.buildInsertQuery(metadata, entity);
+        String query = dmlQueryBuilder.buildInsertQuery(entityMetadata, entity);
         long generatedKey = jdbcTemplate.insertAndReturnGeneratedKey(query);
-        metadata.fillId(entity, generatedKey);
+        entityMetadata.fillId(entity, generatedKey);
 
         return new EntityKey(entity.getClass(), generatedKey);
     }
 
     public ColumnValue getIdValue(Object entity) {
-        EntityMetadata metadata = getMetadata(entity);
-        return metadata.extractIdValue(entity);
+        return entityMetadata.extractIdValue(entity);
     }
 
-    public <T> T find(Class<T> clazz, Long id) {
-        EntityMetadata metadata = getMetadata(clazz);
-        return entityLoader.loadEntity(metadata, id);
-    }
-
-    private EntityMetadata getMetadata(Class<?> entityClass) {
-        return metadataCache.computeIfAbsent(entityClass, EntityMetadata::from);
-    }
-
-    private EntityMetadata getMetadata(Object entity) {
-        return metadataCache.computeIfAbsent(entity.getClass(), EntityMetadata::from);
+    public <T> T find(Long id) {
+        return entityLoader.loadEntity(entityMetadata, id);
     }
 }

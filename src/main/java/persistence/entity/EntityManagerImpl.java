@@ -2,19 +2,23 @@ package persistence.entity;
 
 import jdbc.JdbcTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class EntityManagerImpl implements EntityManager {
     private final PersistenceContext persistenceContext;
-    private final EntityPersister entityPersister;
+    private final JdbcTemplate jdbcTemplate;
+    private final Map<Class<?>, EntityPersister> entityPersisterMap = new HashMap<>();
 
-    private EntityManagerImpl(PersistenceContext persistenceContext, EntityPersister entityPersister) {
+    private EntityManagerImpl(PersistenceContext persistenceContext, JdbcTemplate jdbcTemplate) {
         this.persistenceContext = persistenceContext;
-        this.entityPersister = entityPersister;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public static EntityManager createDefault(JdbcTemplate jdbcTemplate) {
         return new EntityManagerImpl(
                 new PersistenceContextImpl(),
-                EntityPersister.createDefault(jdbcTemplate)
+                jdbcTemplate
         );
     }
 
@@ -25,7 +29,8 @@ public class EntityManagerImpl implements EntityManager {
             return clazz.cast(persistenceContext.get(entityKey));
         }
 
-        T entity = entityPersister.find(clazz, id);
+        EntityPersister entityPersister = getEntityPersister(clazz);
+        T entity = entityPersister.find(id);
         persistenceContext.put(entityKey, entity);
 
         return entity;
@@ -33,6 +38,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public <T> T persist(T entity) {
+        EntityPersister entityPersister = getEntityPersister(entity.getClass());
         EntityKey entityKey = entityPersister.insert(entity);
         persistenceContext.put(entityKey, entity);
 
@@ -41,6 +47,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public <T> void remove(T entity) {
+        EntityPersister entityPersister = getEntityPersister(entity.getClass());
         EntityKey entityKey = new EntityKey(entity.getClass(), entityPersister.getIdValue(entity).value());
         persistenceContext.remove(entityKey);
         entityPersister.delete(entity);
@@ -48,6 +55,7 @@ public class EntityManagerImpl implements EntityManager {
 
     @Override
     public <T> T merge(T entity) {
+        EntityPersister entityPersister = getEntityPersister(entity.getClass());
         EntityKey entityKey = new EntityKey(entity.getClass(), entityPersister.getIdValue(entity).value());
         EntitySnapshot entitySnapshot = persistenceContext.getDatabaseSnapshot(entityKey);
         if (entitySnapshot.isDirty(entity)) {
@@ -56,5 +64,9 @@ public class EntityManagerImpl implements EntityManager {
 
         persistenceContext.put(entityKey, entity);
         return entity;
+    }
+
+    private EntityPersister getEntityPersister(Class<?> clazz) {
+        return entityPersisterMap.computeIfAbsent(clazz, k -> EntityPersister.createDefault(jdbcTemplate, clazz));
     }
 }

@@ -19,7 +19,7 @@ class EntityPersisterTest extends DatabaseTest {
     @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
-        entityPersister = EntityPersister.createDefault(jdbcTemplate);
+        entityPersister = EntityPersister.createDefault(jdbcTemplate, Person.class);
         createTable(Person.class);
     }
 
