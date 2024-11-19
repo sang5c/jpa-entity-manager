@@ -3,6 +3,7 @@ package persistence.entity;
 import persistence.sql.metadata.Column;
 import persistence.sql.metadata.ColumnMetadata;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -32,5 +33,13 @@ public class EntitySnapshot {
         Object snapshotValue = entry.getValue();
         Object entityValue = column.extractColumnValue(entity);
         return !snapshotValue.equals(entityValue);
+    }
+
+    public List<ColumnClause> diffColumns(Object entity) {
+        return columnSnapshots.entrySet().stream()
+                .filter(entry -> hasDiffValue(entity, entry))
+                .map(Map.Entry::getKey)
+                .map(column -> column.generateClause(entity))
+                .toList();
     }
 }

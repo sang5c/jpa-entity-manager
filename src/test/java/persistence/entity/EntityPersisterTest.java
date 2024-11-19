@@ -43,9 +43,10 @@ class EntityPersisterTest extends DatabaseTest {
     void update() {
         Person person = new Person(1L, "bob", 32, "test@email.com", 1);
         insert(person);
+        EntitySnapshot snapshot = EntitySnapshot.from(person);
         person.setName("alice");
 
-        entityPersister.update(person);
+        entityPersister.update(person, snapshot);
         Person updatedPerson = jdbcTemplate.queryForObject("select * from my_users where id = 1", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
 
         assertThat(updatedPerson.getName()).isEqualTo("alice");

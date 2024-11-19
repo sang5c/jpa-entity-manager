@@ -30,8 +30,12 @@ public class EntityPersister {
         );
     }
 
-    public boolean update(Object entity) {
-        String query = dmlQueryBuilder.buildUpdateQuery(entityMetadata, entity);
+    public boolean update(Object entity, EntitySnapshot entitySnapshot) {
+        String query = dmlQueryBuilder.buildUpdateQuery(
+                entityMetadata.getTableName(),
+                entityMetadata.getPrimaryKey().generateClause(entity),
+                entitySnapshot.diffColumns(entity)
+        );
         return jdbcTemplate.executeUpdate(query);
     }
 

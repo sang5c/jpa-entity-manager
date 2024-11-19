@@ -3,6 +3,7 @@ package persistence.entity;
 import jdbc.JdbcTemplate;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class EntityManagerImpl implements EntityManager {
@@ -59,7 +60,7 @@ public class EntityManagerImpl implements EntityManager {
         EntityKey entityKey = new EntityKey(entity.getClass(), entityPersister.getIdValue(entity).value());
         EntitySnapshot entitySnapshot = persistenceContext.getDatabaseSnapshot(entityKey);
         if (entitySnapshot.isDirty(entity)) {
-            entityPersister.update(entity);
+            entityPersister.update(entity, entitySnapshot);
         }
 
         persistenceContext.put(entityKey, entity);

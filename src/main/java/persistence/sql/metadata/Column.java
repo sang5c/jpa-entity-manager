@@ -3,6 +3,7 @@ package persistence.sql.metadata;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import persistence.entity.ColumnClause;
 import persistence.sql.ddl.dialect.Dialect;
 
 import java.lang.reflect.Field;
@@ -95,5 +96,9 @@ public record Column(
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalArgumentException("필드를 찾을 수 없습니다: " + fieldName);
         }
+    }
+
+    public ColumnClause generateClause(Object entity) {
+        return new ColumnClause(name, extractColumnValue(entity));
     }
 }
