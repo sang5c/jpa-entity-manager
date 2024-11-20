@@ -3,13 +3,14 @@ package persistence.sql.metadata;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import persistence.entity.ColumnClause;
 import persistence.sql.ddl.dialect.Dialect;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public record Column<T>(
+public record Column(
         ColumnName name,
         String fieldName,
         Class<?> columnType,
@@ -17,8 +18,8 @@ public record Column<T>(
         boolean primaryKey
 ) {
 
-    public static <T> Column<T> from(Field field) {
-        return new Column<>(
+    public static Column from(Field field) {
+        return new Column(
                 ColumnName.from(field),
                 field.getName(),
                 field.getType(),
@@ -77,7 +78,7 @@ public record Column<T>(
         return !options.contains(ColumnOption.IDENTITY);
     }
 
-    public ColumnValue extractColumnValue(T entity) {
+    public ColumnValue extractColumnValue(Object entity) {
         try {
             Field field = entity.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
@@ -87,7 +88,7 @@ public record Column<T>(
         }
     }
 
-    public void fillValue(T entity, Object value) {
+    public void fillValue(Object entity, Object value) {
         try {
             Field field = entity.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
@@ -95,5 +96,9 @@ public record Column<T>(
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalArgumentException("필드를 찾을 수 없습니다: " + fieldName);
         }
+    }
+
+    public ColumnClause generateClause(Object entity) {
+        return new ColumnClause(name, extractColumnValue(entity));
     }
 }

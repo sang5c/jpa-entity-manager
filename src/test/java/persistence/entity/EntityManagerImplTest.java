@@ -24,7 +24,7 @@ class EntityManagerImplTest extends DatabaseTest {
         createTable(Person.class);
         insert(new Person("bob", 32, "test@email.com"));
 
-        EntityManager<Person> entityManager = EntityManagerImpl.createDefault(Person.class, jdbcTemplate);
+        EntityManager entityManager = EntityManagerImpl.createDefault(jdbcTemplate);
         Person person = entityManager.find(Person.class, 1L);
 
         assertSoftly(softly -> {
@@ -40,7 +40,7 @@ class EntityManagerImplTest extends DatabaseTest {
     void persist() {
         createTable(Person.class);
 
-        EntityManager<Person> entityManager = EntityManagerImpl.createDefault(Person.class, jdbcTemplate);
+        EntityManager entityManager = EntityManagerImpl.createDefault(jdbcTemplate);
         entityManager.persist(new Person("bob", 32, "test@email.com"));
 
         Person savedPerson = jdbcTemplate.queryForObject("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
@@ -60,7 +60,7 @@ class EntityManagerImplTest extends DatabaseTest {
         insert(new Person("bob", 32, "test@email.com"));
 
         Person person = new Person(1L, "bob", 32, "test@email.com", 1);
-        EntityManager<Person> entityManager = EntityManagerImpl.createDefault(Person.class, jdbcTemplate);
+        EntityManager entityManager = EntityManagerImpl.createDefault(jdbcTemplate);
         entityManager.remove(person);
 
         List<Person> users = jdbcTemplate.query("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
@@ -72,19 +72,19 @@ class EntityManagerImplTest extends DatabaseTest {
     @Test
     void update() {
         createTable(Person.class);
-        insert(new Person("bob", 32, "test@email.com"));
+        Person person = new Person("person", 32, "test@email.com");
+        EntityManager entityManager = EntityManagerImpl.createDefault(jdbcTemplate);
+        Person savedPerson = entityManager.persist(person);
+        savedPerson.setAge(99);
+        entityManager.merge(savedPerson);
 
-        Person updatedPerson = new Person(1L, "alice", 25, "test@email.com", 1);
-        EntityManager<Person> entityManager = EntityManagerImpl.createDefault(Person.class, jdbcTemplate);
-        entityManager.update(updatedPerson);
-
-        Person person = jdbcTemplate.queryForObject("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
+        Person resultPerson = jdbcTemplate.queryForObject("select * from my_users", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
 
         assertSoftly(softly -> {
-            softly.assertThat(person.getId()).isEqualTo(1L);
-            softly.assertThat(person.getName()).isEqualTo("alice");
-            softly.assertThat(person.getAge()).isEqualTo(25);
-            softly.assertThat(person.getEmail()).isEqualTo("test@email.com");
+            softly.assertThat(resultPerson.getId()).isEqualTo(1L);
+            softly.assertThat(resultPerson.getName()).isEqualTo("person");
+            softly.assertThat(resultPerson.getAge()).isEqualTo(99);
+            softly.assertThat(resultPerson.getEmail()).isEqualTo("test@email.com");
         });
     }
 }

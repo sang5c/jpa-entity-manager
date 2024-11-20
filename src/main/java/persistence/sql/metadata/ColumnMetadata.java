@@ -10,18 +10,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ColumnMetadata<T> {
-    private final List<Column<T>> columns;
+public class ColumnMetadata {
+    private final List<Column> columns;
 
-    private ColumnMetadata(List<Column<T>> columns) {
+    private ColumnMetadata(List<Column> columns) {
         validate(columns);
         this.columns = columns;
     }
 
-    public static <T> ColumnMetadata<T> from(Class<T> clazz) {
+    public static ColumnMetadata from(Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredFields())
                 .filter(ColumnMetadata::isNotTransient)
-                .map(Column::<T>from)
+                .map(Column::from)
                 .collect(Collectors.collectingAndThen(Collectors.toList(), ColumnMetadata::new));
     }
 
@@ -29,7 +29,7 @@ public class ColumnMetadata<T> {
         return !field.isAnnotationPresent(Transient.class);
     }
 
-    private void validate(List<Column<T>> columns) {
+    private void validate(List<Column> columns) {
         boolean hasIdAnnotation = columns.stream()
                 .anyMatch(Column::primaryKey);
 
@@ -38,36 +38,36 @@ public class ColumnMetadata<T> {
         }
     }
 
-    public List<Column<T>> getColumns() {
+    public List<Column> getColumns() {
         return Collections.unmodifiableList(columns);
     }
 
-    public Column<T> getPrimaryKey() {
+    public Column getPrimaryKey() {
         return columns.stream()
                 .filter(Column::primaryKey)
                 .findFirst()
                 .orElseThrow(IllegalStateException::new);
     }
 
-    public void fillId(T entity, long generatedKey) {
+    public void fillId(Object entity, long generatedKey) {
         getPrimaryKey().fillValue(entity, generatedKey);
     }
 
-    public ColumnValue extractIdValue(T entity) {
+    public ColumnValue extractIdValue(Object entity) {
         return getPrimaryKey().extractColumnValue(entity);
     }
 
-    public List<Column<T>> getColumnsWithoutPrimaryKey() {
+    public List<Column> getColumnsWithoutPrimaryKey() {
         return columns.stream()
                 .filter(Column::hasNotIdentityStrategy)
                 .toList();
     }
 
-    public void fillEntity(T entity, ResultSet resultSet) {
+    public void fillEntity(Object entity, ResultSet resultSet) {
         columns.forEach(column -> column.fillValue(entity, getValue(resultSet, column)));
     }
 
-    private Object getValue(ResultSet resultSet, Column<T> column) {
+    private Object getValue(ResultSet resultSet, Column column) {
         try {
             return resultSet.getObject(column.getName(), column.columnType());
         } catch (SQLException e) {

@@ -13,13 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EntityPersisterTest extends DatabaseTest {
 
-    private EntityPersister<Person> entityPersister;
+    private EntityPersister entityPersister;
 
     @Override
     @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
-        entityPersister = EntityPersister.createDefault(Person.class, jdbcTemplate);
+        entityPersister = EntityPersister.createDefault(jdbcTemplate, Person.class);
         createTable(Person.class);
     }
 
@@ -33,9 +33,9 @@ class EntityPersisterTest extends DatabaseTest {
     void insert() {
         Person person = new Person("bob", 32, "test@email.com");
 
-        long key = entityPersister.insert(person);
+        EntityKey key = entityPersister.insert(person);
 
-        assertThat(key).isEqualTo(1L);
+        assertThat(key.id()).isEqualTo(1L);
     }
 
     @DisplayName("update를 수행하면 데이터베이스에 반영된다")
@@ -43,9 +43,10 @@ class EntityPersisterTest extends DatabaseTest {
     void update() {
         Person person = new Person(1L, "bob", 32, "test@email.com", 1);
         insert(person);
+        EntitySnapshot snapshot = EntitySnapshot.from(person);
         person.setName("alice");
 
-        entityPersister.update(person);
+        entityPersister.update(person, snapshot);
         Person updatedPerson = jdbcTemplate.queryForObject("select * from my_users where id = 1", new EntityRowMapper<>(EntityMetadata.from(Person.class)));
 
         assertThat(updatedPerson.getName()).isEqualTo("alice");

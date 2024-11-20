@@ -1,7 +1,7 @@
 package persistence.entity;
 
-public record EntityKey<T>(
-        Class<T> clazz,
+public record EntityKey(
+        Class<?> clazz,
         Object id
 ) {
     public EntityKey {

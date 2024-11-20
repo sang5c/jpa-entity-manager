@@ -22,6 +22,14 @@ public class JdbcTemplate {
         }
     }
 
+    public boolean executeUpdate(final String sql) {
+        try (final Statement statement = connection.createStatement()) {
+            return statement.executeUpdate(sql) > 0;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public <T> T queryForObject(final String sql, final RowMapper<T> rowMapper) {
         final List<T> results = query(sql, rowMapper);
         if (results.size() != 1) {

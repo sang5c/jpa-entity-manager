@@ -60,15 +60,15 @@ public abstract class DatabaseTest {
         jdbcTemplate.execute(ddlQueryBuilder.buildCreateQuery(clazz));
     }
 
-    protected <T> void insert(T entity) {
-        jdbcTemplate.execute(dmlQueryBuilder.buildInsertQuery(EntityMetadata.from((Class<T>) entity.getClass()), entity));
+    protected void insert(Object entity) {
+        jdbcTemplate.execute(dmlQueryBuilder.buildInsertQuery(EntityMetadata.from(entity.getClass()), entity));
     }
 
-    protected <T> void dropTable(Class<T> clazz) {
+    protected void dropTable(Class<?> clazz) {
         jdbcTemplate.execute(ddlQueryBuilder.buildDropQuery(clazz));
     }
 
-    protected <T> void delete(T entity) {
-        jdbcTemplate.execute(dmlQueryBuilder.buildDeleteQuery(EntityMetadata.from((Class<T>) entity.getClass()), entity));
+    protected void delete(Object entity) {
+        jdbcTemplate.execute(dmlQueryBuilder.buildDeleteQuery(EntityMetadata.from(entity.getClass()), entity));
     }
 }
