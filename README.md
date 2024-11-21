@@ -4,7 +4,7 @@
 
 ### 요구 사항
 
-- [ ] 엔티티의 관리 상태를 추가한다
+- [X] 엔티티 관리 상태를 추가한다
 
 ## 3단계 - Persistence Context, Dirty Check
 
